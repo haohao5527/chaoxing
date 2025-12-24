@@ -18,6 +18,8 @@ class NotificationService(ABC):
     所有具体的通知服务类应继承此类并实现必要的方法。
     """
 
+    CONFIG_PATH = "config.ini"
+
     def __init__(self):
         """初始化通知服务"""
         self.name = self.__class__.__name__
@@ -37,16 +39,19 @@ class NotificationService(ABC):
 
     def _load_config_from_file(self) -> Optional[Dict[str, str]]:
         """
-        获取通知服务配置
+        从配置文件中加载通知服务的配置
         
         Returns:
-            有配置返回配置字典，无配置返回None并禁用通知功能
+            成功返回配置字典，失败返回None
         """
-        if not self._conf:
-            logger.info("未设置notification配置，已忽略外部通知功能")
+        try:
+            config = configparser.ConfigParser()
+            config.read(self.CONFIG_PATH, encoding="utf8")
+            return config['notification']
+        except (KeyError, FileNotFoundError):
+            logger.info("未找到notification配置，已忽略外部通知功能")
             self.disabled = True
             return None
-        return self._conf
 
     def init_notification(self) -> None:
         """初始化通知服务，加载配置并进行必要的设置"""

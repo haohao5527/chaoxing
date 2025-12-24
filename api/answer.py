@@ -136,6 +136,7 @@ class CacheDAO:
 
 # TODO: 重构此部分代码，将此类改为抽象类，加载题库方法改为静态方法，禁止直接初始化此类
 class Tiku:
+    CONFIG_PATH = os.path.join(os.getcwd(), "config.ini")  # TODO: 从运行参数中获取config路径
     DISABLE = False     # 停用标志
     SUBMIT = False      # 提交标志
     COVER_RATE = 0.8    # 覆盖率
@@ -193,13 +194,16 @@ class Tiku:
 
     def _get_conf(self):
         """
-        获取配置，如果没有外部设置配置则停用题库
+        从默认配置文件查询配置, 如果未能查到, 停用题库
         """
-        if not self._conf:
-            logger.info("未设置tiku配置, 已忽略题库功能")
+        try:
+            config = configparser.ConfigParser()
+            config.read(self.CONFIG_PATH, encoding="utf8")
+            return config['tiku']
+        except (KeyError, FileNotFoundError):
+            logger.info("未找到tiku配置, 已忽略题库功能")
             self.DISABLE = True
             return None
-        return self._conf
         
     def query(self,q_info:dict) -> Optional[str]:
         if self.DISABLE:
