@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+Flask应用和Celery配置 - 为Web版本提供支持
+"""
+
 from celery import Celery, Task
 from flask import Flask
 
